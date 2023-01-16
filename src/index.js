@@ -5,7 +5,7 @@ import './css/styles.css';
 const DEBOUNCE_DELAY = 300;
 const inputRef = document.querySelector('#search-box');
 const divRef = document.querySelector('.country-info');
-const listRef = document.querySelector('.country-info');
+const listRef = document.querySelector('.country-list');
 
 inputRef.addEventListener(
   'input',
@@ -19,6 +19,8 @@ inputRef.addEventListener(
           divRef.innerHTML = '';
           listRef.innerHTML = '';
           if (data.length > 10) {
+            divRef.innerHTML = '';
+            listRef.innerHTML = '';
             Notiflix.Notify.info(
               'Too many matches found. Please enter a more specific name.'
             );
