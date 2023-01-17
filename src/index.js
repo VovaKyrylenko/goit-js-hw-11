@@ -19,8 +19,6 @@ inputRef.addEventListener(
           divRef.innerHTML = '';
           listRef.innerHTML = '';
           if (data.length > 10) {
-            divRef.innerHTML = '';
-            listRef.innerHTML = '';
             Notiflix.Notify.info(
               'Too many matches found. Please enter a more specific name.'
             );
@@ -46,9 +44,11 @@ inputRef.addEventListener(
             });
           }
         })
-        .catch(error =>
-          Notiflix.Notify.failure('Oops, there is no country with that name')
-        );
+        .catch(error => {
+          Notiflix.Notify.failure('Oops, there is no country with that name');
+          divRef.innerHTML = '';
+          listRef.innerHTML = '';
+        });
     }
   }, DEBOUNCE_DELAY)
 );
