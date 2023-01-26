@@ -1,54 +1,121 @@
-var debounce = require('lodash.debounce');
+// LIBRARIES
 import Notiflix from 'notiflix';
-import { fetchCountries } from './fetchCountries';
-import './css/styles.css';
-const DEBOUNCE_DELAY = 300;
-const inputRef = document.querySelector('#search-box');
-const divRef = document.querySelector('.country-info');
-const listRef = document.querySelector('.country-list');
-
-inputRef.addEventListener(
-  'input',
-  debounce(evt => {
-    if (evt.target.value.trim() === '') {
-      divRef.innerHTML = '';
-      listRef.innerHTML = '';
-    } else {
-      fetchCountries(evt.target.value)
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+// IMPORT
+import { fetchImages } from './fetchAPI';
+// REFS
+const refs = {
+  gallery: document.querySelector('.gallery'),
+  form: document.querySelector('#search-form'),
+  observer: document.querySelector('.js-observer'),
+  body: document.querySelector('body'),
+  input: document.querySelector('.searcher'),
+};
+let page = 1;
+let total;
+let observer;
+let cardHeight;
+// FUNCTIONS
+function buildMarkup(obj) {
+  let markup = obj
+    .map(img => {
+      return `
+      <div class="portfolio-item">
+          <div class="portfolio-item-wrap">
+          <a href="${img.largeImageURL}">
+            <img src=${img.webformatURL} alt=${img.tags}>
+            <div class="portfolio-item-inner">
+              <ul class="portfolio-list">
+                <li><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#ec4757"
+                    class="bi bi-chat-square-heart-fill" viewBox="0 0 16 16">
+                    <path
+                      d="M2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2Zm6 3.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132Z" />
+                  </svg><b style="font-size: 16px;">${img.likes}</b></li>
+                <li><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                    class="bi bi-eye-fill" viewBox="0 0 16 16">
+                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+                    <path
+                      d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                  </svg><b style="font-size: 16px;">${img.views}</b></li>
+                <li><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#0d6efd"
+                    class="bi bi-chat-left-text-fill" viewBox="0 0 16 16">
+                    <path
+                      d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793V2zm3.5 1a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1h-9zm0 2.5a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1h-9zm0 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z" />
+                  </svg><b style="font-size: 16px;">${img.comments}</b></li>
+                <li><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#198754"
+                    class="bi bi-arrow-down-square-fill" viewBox="0 0 16 16">
+                    <path
+                      d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5a.5.5 0 0 1 1 0z" />
+                  </svg><b style="font-size: 16px;">${img.downloads}</b></li>
+              </ul>
+            </div>
+            </a>
+          </div>
+        </div>`;
+    })
+    .join('');
+  markup += `<div class="js-observer"></div>`;
+  return markup;
+}
+function addMarkup(markup) {
+  refs.gallery.insertAdjacentHTML('beforeend', markup);
+  lightbox.refresh();
+}
+function onLoad(entries, observer) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.remove();
+      page += 1;
+      fetchImages(query, page)
         .then(data => {
-          divRef.innerHTML = '';
-          listRef.innerHTML = '';
-          if (data.length > 10) {
-            Notiflix.Notify.info(
-              'Too many matches found. Please enter a more specific name.'
-            );
-          } else if (data.length === 1) {
-            divRef.innerHTML = `<div style="display:flex; align-items: center;">
-        <img src=${
-          data[0].flags.png
-        } alt="" width="30" style="margin-right: 10px;">
-    <h2>${data[0].name.official}</h2>
-    </div>
-    <ul style="list-style: none; padding: 0">
-      <li><b>Capital: </b>${data[0].capital}</li>
-      <li><b>Population: </b>${data[0].population}</li>
-      <li><b>Languages: </b>${Object.values(data[0].languages)}</li>
-    </ul>`;
-          } else {
-            data.map(country => {
-              listRef.insertAdjacentHTML(
-                'beforeend',
-                `<li style="display: flex; align-items: center;"><img src=${country.flags.png} alt="" width="30" height="100%" style="margin-right: 10px;">
-    <h2>${country.name.official}</h2></li>`
-              );
-            });
-          }
+          addMarkup(buildMarkup(data.hits));
+          observer.observe(document.querySelector('.js-observer'));
         })
-        .catch(error => {
-          Notiflix.Notify.failure('Oops, there is no country with that name');
-          divRef.innerHTML = '';
-          listRef.innerHTML = '';
-        });
+        .catch(err => console.log(err));
     }
-  }, DEBOUNCE_DELAY)
-);
+  });
+}
+function onSubmit(evt) {
+  page = 1;
+  evt.preventDefault();
+  refs.gallery.innerHTML = '';
+  query = evt.currentTarget[0].value;
+  createObserver();
+  fetchImages(query, page)
+    .then(data => {
+      console.log('data:', data);
+      if (data.totalHits === 0) {
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+        return;
+      }
+      addMarkup(buildMarkup(data.hits));
+      observer.observe(document.querySelector('.js-observer'));
+      Notiflix.Notify.success(`📸Hooray! We found ${data.total} images.`);
+
+      window.scrollBy({
+        top: refs.input.firstElementChild.getBoundingClientRect().height,
+        behavior: 'smooth',
+      });
+    })
+    .catch(err => console.log(err));
+}
+// OBSERVER
+function createObserver() {
+  const options = {
+    root: null,
+    rootMargin: '400px',
+    trashhold: 0,
+  };
+  observer = new IntersectionObserver(onLoad, options);
+}
+// LISTENERS
+refs.form.addEventListener('submit', onSubmit);
+// LIGHTBOX
+const lightbox = new SimpleLightbox('.gallery a', {
+  captionDelay: 250,
+});
+lightbox.on('show.simplelightbox', e => e.preventDefault());
+lightbox.on('error.simplelightbox', e => console.log(e));
