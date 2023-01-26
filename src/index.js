@@ -84,7 +84,6 @@ function onSubmit(evt) {
   createObserver();
   fetchImages(query, page)
     .then(data => {
-      console.log('data:', data);
       if (data.totalHits === 0) {
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
