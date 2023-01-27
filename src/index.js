@@ -80,9 +80,9 @@ function onSubmit(evt) {
   page = 1;
   evt.preventDefault();
   refs.gallery.innerHTML = '';
-  query = evt.currentTarget[0].value;
+  let query = evt.currentTarget[0].value;
   createObserver();
-  fetchImages(evt.currentTarget[0].value, page)
+  fetchImages(query, page)
     .then(data => {
       if (data.totalHits === 0) {
         Notiflix.Notify.failure(
