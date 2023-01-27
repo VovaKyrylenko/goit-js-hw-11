@@ -16,6 +16,7 @@ let page = 1;
 let total;
 let observer;
 let cardHeight;
+let query;
 // FUNCTIONS
 function buildMarkup(obj) {
   let markup = obj
@@ -80,7 +81,7 @@ function onSubmit(evt) {
   page = 1;
   evt.preventDefault();
   refs.gallery.innerHTML = '';
-  let query = evt.currentTarget[0].value;
+  query = evt.currentTarget[0].value;
   createObserver();
   fetchImages(query, page)
     .then(data => {
