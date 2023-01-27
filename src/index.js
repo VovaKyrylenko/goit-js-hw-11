@@ -61,6 +61,10 @@ function buildMarkup(obj) {
 }
 function addMarkup(markup) {
   refs.gallery.insertAdjacentHTML('beforeend', markup);
+  window.scrollBy({
+    top: refs.input.firstElementChild.getBoundingClientRect().height,
+    behavior: 'smooth',
+  });
   lightbox.refresh();
 }
 function onLoad(entries, observer) {
@@ -94,11 +98,6 @@ function onSubmit(evt) {
       addMarkup(buildMarkup(data.hits));
       observer.observe(document.querySelector('.js-observer'));
       Notiflix.Notify.success(`📸Hooray! We found ${data.total} images.`);
-
-      window.scrollBy({
-        top: refs.input.firstElementChild.getBoundingClientRect().height,
-        behavior: 'smooth',
-      });
     })
     .catch(err => console.log(err));
 }
