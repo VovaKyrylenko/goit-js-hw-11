@@ -8,12 +8,10 @@ const safesearch = 'true';
 const countImage = '40';
 
 async function fetchImages(query, page) {
-  if (query !== '') {
-    const response = await axios.get(
-      `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=${imageType}&orientation=${orientationType}&safesearch=${safesearch}&page=${page}&per_page=${countImage}`
-    );
-    return response.data;
-  }
+  const response = await axios.get(
+    `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=${imageType}&orientation=${orientationType}&safesearch=${safesearch}&page=${page}&per_page=${countImage}`
+  );
+  return response.data;
 }
 
 export { fetchImages };

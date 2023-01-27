@@ -82,7 +82,7 @@ function onSubmit(evt) {
   refs.gallery.innerHTML = '';
   query = evt.currentTarget[0].value;
   createObserver();
-  fetchImages(query, page)
+  fetchImages(evt.currentTarget[0].value, page)
     .then(data => {
       if (data.totalHits === 0) {
         Notiflix.Notify.failure(
