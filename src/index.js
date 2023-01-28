@@ -18,11 +18,13 @@ let observer;
 let isEnd;
 let query;
 let imgId;
+let lastObserver;
 // FUNCTIONS
 function buildMarkup(obj) {
   let markup = obj
     .map(img => {
       imgId += 1;
+      console.log('imgId:', imgId);
       return `
       <div class="portfolio-item">
           <div class="portfolio-item-wrap">
@@ -58,11 +60,19 @@ function buildMarkup(obj) {
         </div>`;
     })
     .join('');
+  if (imgId >= total) {
+    isEnd = true;
+    markup += `<div class="js-last-observer"></div>`;
+    return markup;
+  }
   markup += `<div class="js-observer"></div>`;
   return markup;
 }
 function addMarkup(markup) {
   refs.gallery.insertAdjacentHTML('beforeend', markup);
+  if (imgId >= total) {
+    createLastObserver();
+  }
   window.scrollBy({
     top: refs.input.firstElementChild.getBoundingClientRect().height,
     behavior: 'smooth',
@@ -70,12 +80,6 @@ function addMarkup(markup) {
   lightbox.refresh();
 }
 function onLoad(entries, observer) {
-  if (isEnd === true) {
-    Notiflix.Notify.warning(
-      'We are sorry, but you have reached the end of search results.'
-    );
-    return;
-  }
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.remove();
@@ -84,7 +88,6 @@ function onLoad(entries, observer) {
         .then(data => {
           addMarkup(buildMarkup(data.hits));
           observer.observe(document.querySelector('.js-observer'));
-          if (imgId + 40 >= total) isEnd = true;
         })
         .catch(err => console.log(err));
     }
@@ -113,6 +116,7 @@ function onSubmit(evt) {
     .catch(err => console.log(err));
 }
 // OBSERVER
+
 function createObserver() {
   const options = {
     root: null,
@@ -120,6 +124,19 @@ function createObserver() {
     trashhold: 0,
   };
   observer = new IntersectionObserver(onLoad, options);
+}
+function createLastObserver() {
+  const options = {
+    root: null,
+    rootMargin: '0px',
+    trashhold: 0,
+  };
+  lastObserver = new IntersectionObserver(() => {
+    Notiflix.Notify.warning(
+      'We are sorry, but you have reached the end of search results.'
+    );
+  }, options);
+  lastObserver.observe(document.querySelector('.js-last-observer'));
 }
 // LISTENERS
 refs.form.addEventListener('submit', onSubmit);
