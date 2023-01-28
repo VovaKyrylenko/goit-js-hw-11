@@ -15,12 +15,14 @@ const refs = {
 let page = 1;
 let total;
 let observer;
-let cardHeight;
+let isEnd;
 let query;
+let imgId;
 // FUNCTIONS
 function buildMarkup(obj) {
   let markup = obj
     .map(img => {
+      imgId += 1;
       return `
       <div class="portfolio-item">
           <div class="portfolio-item-wrap">
@@ -68,6 +70,12 @@ function addMarkup(markup) {
   lightbox.refresh();
 }
 function onLoad(entries, observer) {
+  if (isEnd === true) {
+    Notiflix.Notify.warning(
+      'We are sorry, but you have reached the end of search results.'
+    );
+    return;
+  }
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.remove();
@@ -76,6 +84,7 @@ function onLoad(entries, observer) {
         .then(data => {
           addMarkup(buildMarkup(data.hits));
           observer.observe(document.querySelector('.js-observer'));
+          if (imgId + 40 >= total) isEnd = true;
         })
         .catch(err => console.log(err));
     }
@@ -83,6 +92,7 @@ function onLoad(entries, observer) {
 }
 function onSubmit(evt) {
   page = 1;
+  imgId = 0;
   evt.preventDefault();
   refs.gallery.innerHTML = '';
   query = evt.currentTarget[0].value;
@@ -95,9 +105,10 @@ function onSubmit(evt) {
         );
         return;
       }
+      total = data.totalHits;
       addMarkup(buildMarkup(data.hits));
       observer.observe(document.querySelector('.js-observer'));
-      Notiflix.Notify.success(`📸Hooray! We found ${data.total} images.`);
+      Notiflix.Notify.success(`📸Hooray! We found ${data.totalHits} images.`);
     })
     .catch(err => console.log(err));
 }
