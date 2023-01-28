@@ -100,20 +100,22 @@ function onSubmit(evt) {
   refs.gallery.innerHTML = '';
   query = evt.currentTarget[0].value;
   createObserver();
-  fetchImages(query, page)
-    .then(data => {
-      if (data.totalHits === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-        return;
-      }
-      total = data.totalHits;
-      addMarkup(buildMarkup(data.hits));
-      observer.observe(document.querySelector('.js-observer'));
-      Notiflix.Notify.success(`📸Hooray! We found ${data.totalHits} images.`);
-    })
-    .catch(err => console.log(err));
+  if (query.trim() !== '') {
+    fetchImages(query, page)
+      .then(data => {
+        if (data.totalHits === 0) {
+          Notiflix.Notify.failure(
+            'Sorry, there are no images matching your search query. Please try again.'
+          );
+          return;
+        }
+        total = data.totalHits;
+        addMarkup(buildMarkup(data.hits));
+        observer.observe(document.querySelector('.js-observer'));
+        Notiflix.Notify.success(`📸Hooray! We found ${data.totalHits} images.`);
+      })
+      .catch(err => console.log(err));
+  }
 }
 // OBSERVER
 
